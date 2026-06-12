@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { getProfileImageUrl } from '../utils/fileUtils';
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
@@ -88,7 +89,7 @@ const Navbar = () => {
                                 <a className="nav-link dropdown-toggle fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                     {user.profile_image ? (
                                         <img
-                                            src={`http://localhost/medsync4/uwu-medsync-api/${user.profile_image}?t=${Date.now()}`}
+                                            src={getProfileImageUrl(user.profile_image)}
                                             alt={user.full_name}
                                             className="rounded-circle object-fit-cover shadow-sm"
                                             style={{ width: '35px', height: '35px', border: '1px solid #dee2e6' }}

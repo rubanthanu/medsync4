@@ -1,7 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import api from '../../api/axios';
 import logo from '../../assets/logo.png';
 
 const Login = () => {

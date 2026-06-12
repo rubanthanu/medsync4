@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import api from '../../api/axios';
+import * as healthPostService from '../../services/healthPostService';
 import logo from '../../assets/logo.png';
 
 const Landing = () => {
@@ -9,7 +9,7 @@ const Landing = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const res = await api.get('/healthpost/get_all');
+                const res = await healthPostService.getAll();
                 setPosts(res.data);
             } catch (err) {
                 console.error(err);
