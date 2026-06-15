@@ -4,19 +4,19 @@ import * as appointmentService from '../../services/appointmentService';
 import * as queueService from '../../services/queueService';
 import * as certificateService from '../../services/certificateService';
 import Swal from 'sweetalert2';
+import useFetch from '../../hooks/useFetch';
 
 const ReceptionistDashboard = () => {
+    const { data: mcRequests } = useFetch(certificateService.getCertificateRequests);
     const [windows, setWindows] = useState([]);
     const [selectedWindow, setSelectedWindow] = useState(null);
     const [queue, setQueue] = useState([]);
-    const [activeTab, setActiveTab] = useState('queue'); // 'queue' or 'mc'
-    const [mcRequests, setMcRequests] = useState([]);
+    const [activeTab, setActiveTab] = useState('queue');
     const [bookingData, setBookingData] = useState({ email: '', window_id: '', appointment_date: new Date().toISOString().split('T')[0] });
     const [bookingMsg, setBookingMsg] = useState({ text: '', type: '' });
     
     useEffect(() => {
         fetchWindows();
-        fetchMCRequests();
     }, []);
 
     const fetchWindows = async () => {
@@ -27,15 +27,6 @@ const ReceptionistDashboard = () => {
                 handleSelectWindow(res.data[0]);
                 setBookingData(prev => ({ ...prev, window_id: res.data[0].window_id }));
             }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchMCRequests = async () => {
-        try {
-            const res = await certificateService.getCertificateRequests();
-            setMcRequests(res.data);
         } catch (err) {
             console.error(err);
         }

@@ -1,74 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as adminService from '../../services/adminService';
-import * as healthPostService from '../../services/healthPostService';
 import * as feedbackService from '../../services/feedbackService';
 import Swal from 'sweetalert2';
+import useFetch from '../../hooks/useFetch';
+import useHealthPosts from '../../hooks/useHealthPosts';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({ total_appointments: 0, total_patients: 0, total_certificates: 0, total_prescriptions: 0 });
-    const [users, setUsers] = useState([]);
-    const [posts, setPosts] = useState([]);
-    const [feedbacks, setFeedbacks] = useState([]);
-    const [windows, setWindows] = useState([]);
-    const [newPost, setNewPost] = useState({ title: '', content: '', category: 'Wellness', image_url: '' });
+    const { data: stats } = useFetch(adminService.getStats, { initialData: { total_appointments: 0, total_patients: 0, total_certificates: 0, total_prescriptions: 0 } });
+    const { data: users, refetch: fetchUsers } = useFetch(adminService.getUsers);
+    const { data: feedbacks } = useFetch(feedbackService.getAll, { initialData: [], transform: data => Array.isArray(data) ? data : [] });
+    const { data: windows, refetch: fetchWindows } = useFetch(adminService.getAppointmentWindows);
+    const { posts, newPost, setNewPost, handleCreatePost, handleDeletePost } = useHealthPosts();
     const [newUser, setNewUser] = useState({ full_name: '', email: '', password: '', role_id: '4' });
     const [showAddUser, setShowAddUser] = useState(false);
-    const [activeTab, setActiveTab] = useState('users'); // 'users', 'posts', 'feedbacks', 'windows'
-    
-    useEffect(() => {
-        fetchStats();
-        fetchUsers();
-        fetchPosts();
-        fetchFeedbacks();
-        fetchWindows();
-    }, []);
-
-    const fetchWindows = async () => {
-        try {
-            const res = await adminService.getAppointmentWindows();
-            setWindows(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchPosts = async () => {
-        try {
-            const res = await healthPostService.getAll();
-            setPosts(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchStats = async () => {
-        try {
-            const res = await adminService.getStats();
-            setStats(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchUsers = async () => {
-        try {
-            const res = await adminService.getUsers();
-            setUsers(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchFeedbacks = async () => {
-        try {
-            const res = await feedbackService.getAll();
-            setFeedbacks(Array.isArray(res.data) ? res.data : []);
-        } catch (err) {
-            console.error(err);
-            setFeedbacks([]);
-        }
-    };
+    const [activeTab, setActiveTab] = useState('users');
 
     const toggleStatus = async (user_id, current_status) => {
         const newStatus = current_status === 'Active' ? 'Blocked' : 'Active';
@@ -103,36 +49,6 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleCreatePost = async (e) => {
-        e.preventDefault();
-        try {
-            await healthPostService.create(newPost);
-            setNewPost({ title: '', content: '', category: 'Wellness', image_url: '' });
-            fetchPosts();
-            Swal.fire('Success!', 'Post created successfully!', 'success');
-        } catch (err) {
-            Swal.fire('Error!', 'Failed to create post', 'error');
-        }
-    };
-
-    const handleDeletePost = async (post_id) => {
-        const result = await Swal.fire({
-            title: 'Delete post?',
-            text: 'Are you sure you want to delete this post?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        });
-        if (!result.isConfirmed) return;
-        try {
-            await healthPostService.deletePost(post_id);
-            fetchPosts();
-            Swal.fire('Deleted!', 'Post has been deleted.', 'success');
-        } catch (err) {
-            Swal.fire('Error!', 'Failed to delete post', 'error');
-        }
-    };
 
     return (
         <div className="container py-4 animate-fade-in">

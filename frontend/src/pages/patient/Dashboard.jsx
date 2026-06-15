@@ -1,59 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as notificationService from '../../services/notificationService';
 import * as appointmentService from '../../services/appointmentService';
 import * as feedbackService from '../../services/feedbackService';
 import Swal from 'sweetalert2';
+import useFetch from '../../hooks/useFetch';
+import useToast from '../../hooks/useToast';
 
 const PatientDashboard = () => {
-    const [notifications, setNotifications] = useState([]);
-    const [appointments, setAppointments] = useState([]);
+    const { toast, showToast, hideToast } = useToast();
+    const { data: notifications, refetch: fetchNotifications } = useFetch(notificationService.getAll);
+    const { data: appointments, loaded: appointmentsLoaded, refetch: refreshAppointments } = useFetch(appointmentService.getPatientAppointments);
     const [feedbackText, setFeedbackText] = useState('');
-    const [toast, setToast] = useState(null);
-    const [appointmentsLoading, setAppointmentsLoading] = useState(true);
     const [feedbackLoading, setFeedbackLoading] = useState(false);
-
-    const fetchNotifications = async () => {
-        try {
-            const res = await notificationService.getAll();
-            setNotifications(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    useEffect(() => {
-        if (!toast) return;
-        const timer = setTimeout(() => setToast(null), 3500);
-        return () => clearTimeout(timer);
-    }, [toast]);
-    
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
-
-    useEffect(() => {
-        const fetchAppointments = async () => {
-            try {
-                const res = await appointmentService.getPatientAppointments();
-                setAppointments(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setAppointmentsLoading(false);
-            }
-        };
-        fetchAppointments();
-    }, []);
-
-    const refreshAppointments = async () => {
-        try {
-            const res = await appointmentService.getPatientAppointments();
-            setAppointments(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const handleCancelAppointment = async (appointmentId) => {
         const result = await Swal.fire({
@@ -71,17 +30,17 @@ const PatientDashboard = () => {
 
         try {
             await appointmentService.cancelAppointment(appointmentId);
-            setToast({ type: 'success', message: 'Appointment cancelled successfully.' });
+            showToast('success', 'Appointment cancelled successfully.');
             await refreshAppointments();
         } catch (err) {
-            setToast({ type: 'danger', message: err?.response?.data?.message || 'Unable to cancel appointment.' });
+            showToast('danger', err?.response?.data?.message || 'Unable to cancel appointment.');
         }
     };
 
     const handleFeedbackSubmit = async (e) => {
         e.preventDefault();
         if (!feedbackText.trim()) {
-            setToast({ type: 'danger', message: 'Please enter feedback before submitting.' });
+            showToast('danger', 'Please enter feedback before submitting.');
             return;
         }
 
@@ -89,9 +48,9 @@ const PatientDashboard = () => {
         try {
             await feedbackService.submit(feedbackText);
             setFeedbackText('');
-            setToast({ type: 'success', message: 'Feedback submitted successfully.' });
+            showToast('success', 'Feedback submitted successfully.');
         } catch (err) {
-            setToast({ type: 'danger', message: err?.response?.data?.message || 'Unable to submit feedback.' });
+            showToast('danger', err?.response?.data?.message || 'Unable to submit feedback.');
         } finally {
             setFeedbackLoading(false);
         }
@@ -121,7 +80,7 @@ const PatientDashboard = () => {
             {toast && (
                 <div className={`toast-alert toast-alert-${toast.type}`} role="status" aria-live="polite">
                     <span>{toast.message}</span>
-                    <button type="button" className="btn-close btn-close-white ms-3" aria-label="Close" onClick={() => setToast(null)}></button>
+                    <button type="button" className="btn-close btn-close-white ms-3" aria-label="Close" onClick={hideToast}></button>
                 </div>
             )}
 
@@ -178,7 +137,7 @@ const PatientDashboard = () => {
                 </div>
 
                 <div className="row g-3">
-                    {appointmentsLoading ? (
+                    {!appointmentsLoaded ? (
                         <div className="col-12 text-center py-4 text-muted">Loading appointments...</div>
                     ) : appointments.length > 0 ? appointments.map((appointment) => (
                         <div key={appointment.appointment_id} className="col-12 col-lg-6">

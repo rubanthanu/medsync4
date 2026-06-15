@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import * as appointmentService from '../../services/appointmentService';
 import * as queueService from '../../services/queueService';
-import * as healthPostService from '../../services/healthPostService';
 import * as feedbackService from '../../services/feedbackService';
 import * as certificateService from '../../services/certificateService';
 import * as doctorService from '../../services/doctorService';
 import * as prescriptionService from '../../services/prescriptionService';
 import * as userService from '../../services/userService';
+import useFetch from '../../hooks/useFetch';
+import useHealthPosts from '../../hooks/useHealthPosts';
 
 import QueueTab from './components/QueueTab';
 import PrescriptionModal from './components/PrescriptionModal';
@@ -18,24 +19,24 @@ import FeedbackTab from './components/FeedbackTab';
 import LeaveTab from './components/LeaveTab';
 
 const DoctorDashboard = () => {
+    // Custom hooks
+    const { posts, newPost, setNewPost, handleCreatePost, handleDeletePost } = useHealthPosts();
+    const { data: feedbacks } = useFetch(feedbackService.getAll, { initialData: [], transform: data => Array.isArray(data) ? data : [] });
+    const { data: certificates, refetch: fetchCertificates } = useFetch(certificateService.getCertificateRequests);
+    const { data: leaves, refetch: fetchLeaves } = useFetch(doctorService.getLeaves);
+
+    // Window & queue state (complex logic, kept as-is)
     const [windows, setWindows] = useState([]);
     const [activeWindow, setActiveWindow] = useState(null);
     const [selectedWindow, setSelectedWindow] = useState(null);
     const [queue, setQueue] = useState([]);
 
-    // Health posts state
-    const [posts, setPosts] = useState([]);
-    const [feedbacks, setFeedbacks] = useState([]);
-    const [newPost, setNewPost] = useState({ title: '', content: '', category: 'Wellness', image_url: '' });
-
-    // Certificate requests states
-    const [certificates, setCertificates] = useState([]);
+    // Certificate review states
     const [selectedCert, setSelectedCert] = useState(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [reviewing, setReviewing] = useState(false);
 
     // Leave management states
-    const [leaves, setLeaves] = useState([]);
     const [leaveDate, setLeaveDate] = useState('');
     const [leaveReason, setLeaveReason] = useState('Medical Leave');
     const [markingLeave, setMarkingLeave] = useState(false);
@@ -52,15 +53,7 @@ const DoctorDashboard = () => {
 
     useEffect(() => {
         fetchWindows();
-        fetchPosts();
-        fetchFeedbacks();
-        fetchCertificates();
-        fetchLeaves();
     }, []);
-
-    const fetchLeaves = async () => {
-        try { const res = await doctorService.getLeaves(); setLeaves(res.data); } catch (err) { console.error(err); }
-    };
 
     const fetchWindows = async (preferredWindowId = null) => {
         try {
@@ -86,17 +79,7 @@ const DoctorDashboard = () => {
         try { const res = await queueService.getQueue(window_id); setQueue(res.data); } catch (err) { console.error(err); }
     };
 
-    const fetchPosts = async () => {
-        try { const res = await healthPostService.getAll(); setPosts(res.data); } catch (err) { console.error(err); }
-    };
 
-    const fetchFeedbacks = async () => {
-        try { const res = await feedbackService.getAll(); setFeedbacks(Array.isArray(res.data) ? res.data : []); } catch (err) { console.error(err); setFeedbacks([]); }
-    };
-
-    const fetchCertificates = async () => {
-        try { const res = await certificateService.getCertificateRequests(); setCertificates(res.data); } catch (err) { console.error(err); }
-    };
 
     const handleSelectWindow = (win) => { setSelectedWindow(win); fetchQueue(win.window_id); };
 
@@ -115,16 +98,7 @@ const DoctorDashboard = () => {
         try { const res = await queueService.nextPatient(selectedWindow.window_id); Swal.fire({ title: 'Next Patient Called', text: res.data.message, icon: 'info', timer: 2000, showConfirmButton: false }); fetchQueue(selectedWindow.window_id); } catch (err) { Swal.fire('Error!', err.response?.data?.message || 'Error', 'error'); }
     };
 
-    const handleCreatePost = async (e) => {
-        e.preventDefault();
-        try { await healthPostService.create(newPost); setNewPost({ title: '', content: '', category: 'Wellness', image_url: '' }); fetchPosts(); Swal.fire('Created!', 'Post created successfully!', 'success'); } catch (err) { Swal.fire('Error!', 'Failed to create post: ' + (err.response?.data?.message || 'Error'), 'error'); }
-    };
 
-    const handleDeletePost = async (post_id) => {
-        const result = await Swal.fire({ title: 'Delete Post?', text: 'Are you sure you want to delete this post?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, delete it!' });
-        if (!result.isConfirmed) return;
-        try { await healthPostService.deletePost(post_id); fetchPosts(); Swal.fire('Deleted!', 'Post deleted successfully.', 'success'); } catch (err) { Swal.fire('Error!', 'Failed to delete post: ' + (err.response?.data?.message || 'Unauthorized'), 'error'); }
-    };
 
     const handleOpenPrescription = async (appt) => {
         setActiveAppointment(appt);
