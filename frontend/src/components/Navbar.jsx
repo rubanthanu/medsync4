@@ -41,7 +41,7 @@ const Navbar = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav me-auto">
+                    <ul className="navbar-nav me-auto align-items-center">
                         {!user && (
                             <>
                                 <li className="nav-item">
@@ -83,7 +83,7 @@ const Navbar = () => {
                             </>
                         )}
                     </ul>
-                    <ul className="navbar-nav ms-auto">
+                    <ul className="navbar-nav ms-auto align-items-center">
                         {user ? (
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
@@ -110,7 +110,7 @@ const Navbar = () => {
                         ) : (
                             <>
                                 <li className="nav-item">
-                                    <Link className="btn btn-outline-primary me-2 px-4 rounded-pill" to="/login">Login</Link>
+                                    <Link className="btn btn-outline-primary me-lg-2 mb-2 mb-lg-0 px-4 rounded-pill" to="/login">Login</Link>
                                 </li>
                                 <li className="nav-item">
                                     <Link className="btn btn-primary px-4 rounded-pill" to="/register">Register</Link>
