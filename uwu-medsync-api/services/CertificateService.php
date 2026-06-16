@@ -7,6 +7,7 @@ require_once __DIR__ . '/../helpers/PDFHelper.php';
 require_once __DIR__ . '/../helpers/UploadHelper.php';
 require_once __DIR__ . '/../exceptions/NotFoundException.php';
 require_once __DIR__ . '/../exceptions/PermissionException.php';
+require_once __DIR__ . '/../exceptions/ValidationException.php';
 
 class CertificateService {
     private $conn;
@@ -24,12 +25,12 @@ class CertificateService {
     }
 
     public function requestCertificate($userId, $startDate, $endDate, $reason, $file) {
-        // Upload file
+        // Upload file — PDF or Images allowed
         $target_dir = __DIR__ . "/../uploads/medical_proofs/";
-        $file_name = UploadHelper::uploadFile($file, $target_dir);
+        $file_name = UploadHelper::uploadFile($file, $target_dir, 'proof', 'proof_');
 
         if (!$file_name) {
-            throw new \Exception("Failed to upload proof file.");
+            throw new ValidationException("Failed to upload proof file.");
         }
 
         // Get patient id

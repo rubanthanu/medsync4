@@ -12,7 +12,7 @@ class PDFHelper {
      */
     public static function generatePDF($html, $filename, $targetDir) {
         if (!file_exists($targetDir)) {
-            mkdir($targetDir, 0777, true);
+            mkdir($targetDir, 0755, true);
         }
 
         $dompdf = new Dompdf();

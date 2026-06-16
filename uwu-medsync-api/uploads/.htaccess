@@ -1,0 +1,25 @@
+# ==========================================================
+# SECURITY: Prevent PHP/script execution in upload directories
+# ==========================================================
+# This file MUST remain in the uploads/ directory.
+# It blocks execution of any server-side script that an
+# attacker might manage to upload (webshell prevention).
+
+# Disable PHP engine entirely in this directory tree
+php_flag engine off
+
+# Deny access to any file with a dangerous extension
+<FilesMatch "\.(php|phtml|php3|php4|php5|phps|phar|cgi|pl|py|sh|bash)$">
+    Require all denied
+</FilesMatch>
+
+# Only allow specific safe file types to be served
+<FilesMatch "\.(jpg|jpeg|png|webp|gif|pdf)$">
+    Require all granted
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+
+# Force safe content types — prevent browsers from sniffing
+Header set X-Content-Type-Options "nosniff"

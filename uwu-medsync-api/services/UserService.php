@@ -83,16 +83,8 @@ class UserService {
             $profile_image = null;
             if (isset($files['profile_image']) && $files['profile_image']['error'] == UPLOAD_ERR_OK) {
                 $target_dir = __DIR__ . "/../uploads/profiles/";
-                $file_extension = pathinfo($files["profile_image"]["name"], PATHINFO_EXTENSION);
-                $file_name = "profile_" . $userId . "_" . time() . "." . $file_extension;
-
-                if (!file_exists($target_dir)) {
-                    mkdir($target_dir, 0777, true);
-                }
-
-                if (move_uploaded_file($files["profile_image"]["tmp_name"], $target_dir . $file_name)) {
-                    $profile_image = "uploads/profiles/" . $file_name;
-                }
+                $file_name = UploadHelper::uploadFile($files['profile_image'], $target_dir, 'image', 'profile_');
+                $profile_image = "uploads/profiles/" . $file_name;
             }
 
             // Update basic users details
@@ -122,16 +114,8 @@ class UserService {
                 $digital_signature = null;
                 if (isset($files['digital_signature']) && $files['digital_signature']['error'] == UPLOAD_ERR_OK) {
                     $target_dir = __DIR__ . "/../uploads/signatures/";
-                    $file_extension = pathinfo($files["digital_signature"]["name"], PATHINFO_EXTENSION);
-                    $file_name = "sig_" . $userId . "_" . time() . "." . $file_extension;
-
-                    if (!file_exists($target_dir)) {
-                        mkdir($target_dir, 0777, true);
-                    }
-
-                    if (move_uploaded_file($files["digital_signature"]["tmp_name"], $target_dir . $file_name)) {
-                        $digital_signature = "uploads/signatures/" . $file_name;
-                    }
+                    $file_name = UploadHelper::uploadFile($files['digital_signature'], $target_dir, 'image', 'sig_');
+                    $digital_signature = "uploads/signatures/" . $file_name;
                 }
 
                 $this->doctorRepo->updateSpecialization($userId, $data->specialization, $digital_signature);

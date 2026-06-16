@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../middleware/CsrfMiddleware.php';
 require_once __DIR__ . '/../validators/AuthValidator.php';
 require_once __DIR__ . '/../services/AuthService.php';
 
@@ -11,6 +12,22 @@ class AuthController extends BaseController {
     public function __construct() {
         parent::__construct();
         $this->authService = new AuthService($this->conn);
+    }
+
+    /**
+     * GET /auth/csrf_token
+     * Returns a CSRF token for the current session.
+     * The frontend must send this token in the X-CSRF-Token header
+     * for every POST/PUT/PATCH/DELETE request.
+     */
+    public function csrf_token() {
+        try {
+            $token = CsrfMiddleware::getToken();
+            http_response_code(200);
+            echo json_encode(["csrf_token" => $token]);
+        } catch (Exception $e) {
+            $this->handleException($e);
+        }
     }
 
     public function register() {

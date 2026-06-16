@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import * as authService from '../services/authService';
+import { clearCsrfToken } from '../api/axios';
 
 export const AuthContext = createContext();
 
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children }) => {
         } catch(e) {
             console.error(e);
         }
+        clearCsrfToken();
         setUser(null);
         localStorage.removeItem('user');
     };
