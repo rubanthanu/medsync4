@@ -201,9 +201,8 @@ const Profile = () => {
             )}
 
             <form onSubmit={handleSaveProfile} className="needs-validation">
-                {/* Profile Header Card */}
                 <div className="card border-0 shadow-sm bg-white p-4 rounded-4 mb-4">
-                    <div className="d-flex align-items-center gap-4">
+                    <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start text-center text-sm-start gap-4">
                         {/* Avatar Picker */}
                         <div className="position-relative">
                             {profileImagePreview ? (

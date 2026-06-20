@@ -35,7 +35,7 @@ const Register = () => {
     return (
         <div className="row justify-content-center animate-fade-in mt-4">
             <div className="col-md-5">
-                <div className="card p-5">
+                <div className="card p-3 p-sm-5">
                     <div className="text-center mb-4">
                         <img src={logo} alt="UWU MedSync Logo" height="80" className="mb-3" />
                         <h2 className="fw-bold text-primary">Create Account</h2>

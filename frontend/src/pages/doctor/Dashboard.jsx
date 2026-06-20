@@ -159,7 +159,7 @@ const DoctorDashboard = () => {
             </div>
 
             {/* Dashboard Navigation Tabs */}
-            <ul className="nav nav-pills mb-4 gap-2 bg-light p-2 rounded-4 d-inline-flex border-0">
+            <ul className="nav nav-pills mb-4 gap-2 bg-light p-2 rounded-4 d-flex flex-nowrap overflow-x-auto border-0 w-100 scrollbar-hide">
                 <li className="nav-item">
                     <button className={`nav-link rounded-pill px-4 fw-semibold border-0 ${activeTab === 'queue' ? 'active bg-primary text-white shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('queue')}>
                         <i className="bi bi-calendar2-check me-2"></i> Active Queue

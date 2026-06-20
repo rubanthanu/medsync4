@@ -64,7 +64,7 @@ const LiveQueue = () => {
             ) : (
                 <div className="row g-4">
                     <div className="col-lg-4">
-                        <div className="card border-0 shadow-sm bg-primary text-white p-4 text-center sticky-top" style={{top: '80px'}}>
+                        <div className="card border-0 shadow-sm bg-primary text-white p-4 text-center sticky-lg-top" style={{top: '80px'}}>
                             <h5 className="opacity-75">Currently Active</h5>
                             <h2 className="fw-bold mb-4">{activeWindow.window_name}</h2>
                             <div className="bg-white text-primary rounded-4 p-4 mb-3">

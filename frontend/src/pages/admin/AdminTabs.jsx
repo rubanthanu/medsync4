@@ -1,6 +1,6 @@
 const AdminTabs = ({ activeTab, onTabChange }) => {
     return (
-        <ul className="nav nav-pills mb-4 gap-2 bg-light p-2 rounded-4 d-inline-flex border-0">
+        <ul className="nav nav-pills mb-4 gap-2 bg-light p-2 rounded-4 d-flex flex-nowrap overflow-x-auto border-0 w-100 scrollbar-hide">
             <li className="nav-item">
                 <button className={`nav-link rounded-pill px-4 fw-semibold border-0 ${activeTab === 'users' ? 'active bg-primary text-white shadow-sm' : 'text-secondary'}`} onClick={() => onTabChange('users')}>
                     <i className="bi bi-people me-2"></i> User Management

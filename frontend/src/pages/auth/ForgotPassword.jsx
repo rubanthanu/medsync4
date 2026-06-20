@@ -25,7 +25,7 @@ const ForgotPassword = () => {
     return (
         <div className="row justify-content-center animate-fade-in mt-5">
             <div className="col-md-5">
-                <div className="card p-5">
+                <div className="card p-3 p-sm-5">
                     <div className="text-center mb-4">
                         <div className="bg-primary-subtle rounded-circle d-inline-flex p-3 mb-3">
                             <i className="bi bi-shield-lock text-primary fs-2"></i>

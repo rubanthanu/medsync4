@@ -93,7 +93,7 @@ const PatientDashboard = () => {
             </div>
 
             <div className="row g-4 mb-4">
-                <div className="col-md-3">
+                <div className="col-md-6 col-lg-3">
                     <div className="card h-100 p-4 border-0 bg-primary-subtle text-primary text-center rounded-4 hover-grow shadow-sm surface-card">
                         <i className="bi bi-calendar2-check display-4 mb-3"></i>
                         <h5 className="fw-bold">Book Appointment</h5>
@@ -101,7 +101,7 @@ const PatientDashboard = () => {
                         <Link to="/patient/book" className="btn btn-primary rounded-pill mt-auto">Book Now</Link>
                     </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-6 col-lg-3">
                     <div className="card h-100 p-4 border-0 bg-success-subtle text-success text-center rounded-4 hover-grow shadow-sm surface-card">
                         <i className="bi bi-person-lines-fill display-4 mb-3"></i>
                         <h5 className="fw-bold">Live Queue</h5>
@@ -109,7 +109,7 @@ const PatientDashboard = () => {
                         <Link to="/patient/queue" className="btn btn-success rounded-pill mt-auto">View Queue</Link>
                     </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-6 col-lg-3">
                     <div className="card h-100 p-4 border-0 bg-warning-subtle text-warning-emphasis text-center rounded-4 hover-grow shadow-sm surface-card">
                         <i className="bi bi-file-earmark-medical display-4 mb-3"></i>
                         <h5 className="fw-bold">Certificates & Prescriptions</h5>
@@ -117,7 +117,7 @@ const PatientDashboard = () => {
                         <Link to="/patient/certificates" className="btn btn-warning text-white rounded-pill mt-auto">View Documents</Link>
                     </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-6 col-lg-3">
                     <div className="card h-100 p-4 border-0 bg-info-subtle text-info-emphasis text-center rounded-4 hover-grow shadow-sm surface-card">
                         <i className="bi bi-person-gear display-4 mb-3"></i>
                         <h5 className="fw-bold">My Profile</h5>
@@ -230,7 +230,7 @@ const PatientDashboard = () => {
             <div className="feedback-panel mt-5">
                 <div className="feedback-copy">
                     <p className="eyebrow mb-1">Feedback</p>
-                    <h4 className="fw-bold mb-2 text-dark">Submit Feedback</h4>
+                    <h4 className="fw-bold mb-2 text-white">Submit Feedback</h4>
                     <p className="mb-0 text-muted">Share a quick note about your visit or the platform experience.</p>
                 </div>
 

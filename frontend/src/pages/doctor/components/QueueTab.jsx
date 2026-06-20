@@ -6,7 +6,7 @@ const QueueTab = ({ windows, selectedWindow, queue, onSelectWindow, onStartWindo
             {/* Today's Windows List */}
             <div className="row g-4 mb-5">
                 {windows.map(win => (
-                    <div className="col-md-3" key={win.window_id} onClick={() => onSelectWindow(win)} role="button" tabIndex={0}>
+                    <div className="col-md-6 col-lg-3" key={win.window_id} onClick={() => onSelectWindow(win)} role="button" tabIndex={0}>
                         <div className={`card h-100 border-0 shadow-sm rounded-4 ${win.is_active ? 'bg-primary text-white shadow' : 'bg-white'} ${selectedWindow?.window_id === win.window_id ? 'border border-2 border-primary' : ''}`}>
                             <div className="card-body p-4 text-center">
                                 <h5 className="fw-bold">{win.window_name}</h5>

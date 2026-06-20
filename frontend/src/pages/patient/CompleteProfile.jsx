@@ -51,7 +51,7 @@ const CompleteProfile = () => {
     return (
         <div className="row justify-content-center animate-fade-in mt-4 mb-5">
             <div className="col-md-8">
-                <div className="card p-5 border-0 shadow-sm">
+                <div className="card p-3 p-sm-5 border-0 shadow-sm">
                     <div className="mb-4 text-center">
                         <h2 className="fw-bold text-primary">Complete Your Profile</h2>
                         <p className="text-muted">Please provide your medical information to continue using UWU MedSync.</p>

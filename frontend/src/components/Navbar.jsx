@@ -1,5 +1,5 @@
-import { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { getProfileImageUrl } from '../utils/fileUtils';
 import logo from '../assets/logo.png';
@@ -7,6 +7,17 @@ import logo from '../assets/logo.png';
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const navbar = document.getElementById('navbarNav');
+        if (navbar && navbar.classList.contains('show')) {
+            const toggler = document.querySelector('.navbar-toggler');
+            if (toggler) {
+                toggler.click();
+            }
+        }
+    }, [location]);
 
     const handleLogout = () => {
         logout();
