@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2026 at 09:20 AM
+-- Generation Time: Jun 21, 2026 at 06:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,15 @@ CREATE TABLE `active_windows` (
   `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `ended_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `active_windows`
+--
+
+INSERT INTO `active_windows` (`active_id`, `doctor_id`, `window_id`, `appointment_date`, `status`, `started_at`, `ended_at`) VALUES
+(211, 1, 3, '2026-05-31', 'Finished', '2026-05-31 10:38:19', '2026-05-31 10:40:35'),
+(212, 1, 1, '2026-06-01', 'Finished', '2026-06-01 11:56:18', '2026-06-01 12:00:33'),
+(215, 1, 2, '2026-06-01', 'Finished', '2026-06-01 12:00:44', '2026-06-01 12:18:10');
 
 -- --------------------------------------------------------
 
@@ -82,65 +91,24 @@ CREATE TABLE `appointments` (
 INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `window_id`, `appointment_date`, `queue_number`, `appointment_status`, `estimated_time`, `created_by`, `created_at`) VALUES
 (20, 2, 1, 3, '2026-05-27', 1, 'Completed', '12:54:00', 8, '2026-05-27 18:48:32'),
 (21, 1, 1, 1, '2026-05-27', 1, 'Walk-In', '07:54:00', 5, '2026-05-27 19:39:03'),
-(24, 2, 1, 4, '2026-05-28', 1, 'Booked', '14:54:00', 8, '2026-05-28 06:57:30');
-
---
--- Triggers `appointments`
---
-DELIMITER $$
-CREATE TRIGGER `auto_estimated_time` BEFORE INSERT ON `appointments` FOR EACH ROW BEGIN
-    DECLARE startTime TIME;
-    DECLARE endTime TIME;
-    DECLARE maxAllowed INT;
-    DECLARE totalMinutes INT;
-    DECLARE timePerPatient DECIMAL(10,2);
-    DECLARE bufferMinutes DECIMAL(10,2);
-
-    SELECT start_time, end_time, max_slots
-    INTO startTime, endTime, maxAllowed
-    FROM appointment_windows
-    WHERE window_id = NEW.window_id;
-
-    SET totalMinutes = TIMESTAMPDIFF(MINUTE, startTime, endTime);
-
-    SET timePerPatient = totalMinutes / maxAllowed;
-
-    SET bufferMinutes = timePerPatient / 2;
-
-    SET NEW.estimated_time = TIMESTAMPADD(
-        MINUTE,
-        ROUND(((NEW.queue_number - 1) * timePerPatient) - bufferMinutes),
-        CONCAT(NEW.appointment_date, ' ', startTime)
-    );
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `auto_queue_number` BEFORE INSERT ON `appointments` FOR EACH ROW BEGIN
-    DECLARE next_queue INT;
-    DECLARE max_allowed INT;
-
-    SELECT max_slots
-    INTO max_allowed
-    FROM appointment_windows
-    WHERE window_id = NEW.window_id;
-
-    SELECT COUNT(*) + 1
-    INTO next_queue
-    FROM appointments
-    WHERE appointment_date = NEW.appointment_date
-      AND window_id = NEW.window_id
-      AND appointment_status IN ('Booked','Walk-In','Current');
-
-    IF next_queue > max_allowed THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'This appointment window is full for selected date';
-    ELSE
-        SET NEW.queue_number = next_queue;
-    END IF;
-END
-$$
-DELIMITER ;
+(24, 2, 1, 4, '2026-05-28', 1, 'Cancelled', '14:54:00', 8, '2026-05-28 06:57:30'),
+(26, 2, 1, 3, '2026-05-31', 1, 'Completed', '12:42:00', 8, '2026-05-31 03:40:31'),
+(27, 3, 1, 1, '2026-06-01', 1, 'Completed', '07:42:00', 9, '2026-06-01 11:38:45'),
+(28, 4, 1, 2, '2026-06-02', 1, 'Cancelled', '09:42:00', 11, '2026-06-01 11:50:47'),
+(29, 4, 1, 2, '2026-06-01', 1, 'Completed', '09:42:00', 11, '2026-06-01 11:51:38'),
+(31, 2, 1, 4, '2026-06-01', 1, 'Cancelled', '14:42:00', 8, '2026-06-01 14:59:31'),
+(34, 2, 1, 3, '2026-06-02', 1, 'Cancelled', '12:42:00', 8, '2026-06-02 05:22:05'),
+(39, 2, 1, 4, '2026-06-02', 1, 'Cancelled', '14:42:00', 8, '2026-06-02 05:30:57'),
+(40, 2, 1, 2, '2026-06-02', 2, 'Cancelled', '09:42:00', 8, '2026-06-02 05:31:26'),
+(41, 3, 1, 1, '2026-06-02', 1, 'Booked', '07:42:00', 9, '2026-06-02 06:05:40'),
+(42, 5, 1, 1, '2026-06-02', 2, 'Cancelled', '08:06:00', 12, '2026-06-02 07:16:57'),
+(43, 5, 1, 3, '2026-06-02', 1, 'Cancelled', '12:54:00', 12, '2026-06-02 07:18:36'),
+(44, 5, 1, 2, '2026-06-02', 2, 'Cancelled', '10:06:00', 12, '2026-06-02 07:19:30'),
+(45, 2, 1, 3, '2026-06-02', 1, 'Cancelled', '12:54:00', 8, '2026-06-02 07:46:24'),
+(46, 2, 1, 2, '2026-06-02', 2, 'Cancelled', '10:06:00', 8, '2026-06-02 07:54:22'),
+(47, 5, 1, 4, '2026-06-02', 1, 'Cancelled', '14:54:00', 12, '2026-06-02 08:06:42'),
+(48, 5, 1, 3, '2026-06-03', 1, 'Booked', '12:54:00', 12, '2026-06-03 04:09:53'),
+(49, 2, 1, 1, '2026-06-16', 1, 'Booked', '07:54:00', 8, '2026-06-15 09:51:26');
 
 -- --------------------------------------------------------
 
@@ -188,7 +156,10 @@ CREATE TABLE `checkup_history` (
 --
 
 INSERT INTO `checkup_history` (`history_id`, `appointment_id`, `patient_id`, `doctor_id`, `diagnosis`, `notes`, `created_at`) VALUES
-(4, 20, 2, 1, 'fytfyu', 'hhjgj', '2026-05-27 19:52:59');
+(4, 20, 2, 1, 'fytfyu', 'hhjgj', '2026-05-27 19:52:59'),
+(6, 26, 2, 1, 'Fever', 'High Body Temperature', '2026-05-31 10:40:28'),
+(7, 27, 3, 1, 'Common cold', 'running nose', '2026-06-01 12:00:12'),
+(8, 29, 4, 1, 'cold', 'headache', '2026-06-01 12:09:19');
 
 -- --------------------------------------------------------
 
@@ -242,6 +213,14 @@ CREATE TABLE `email_logs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `email_logs`
+--
+
+INSERT INTO `email_logs` (`email_log_id`, `user_id`, `recipient_email`, `subject`, `message`, `email_status`, `sent_at`, `created_at`) VALUES
+(8, 11, 'cst23083@std.uwu.ac.lk', 'UWU MedSync - Email Verification OTP', '<h2>Welcome to UWU MedSync!</h2><p>Your OTP for registration is: <strong>935603</strong></p><p>This OTP will expire in 15 minutes.</p>', 'Sent', '2026-06-01 11:46:11', '2026-06-01 11:46:11'),
+(9, 12, 'cst23097@std.uwu.ac.lk', 'UWU MedSync - Email Verification OTP', '<h2>Welcome to UWU MedSync!</h2><p>Your OTP for registration is: <strong>837208</strong></p><p>This OTP will expire in 15 minutes.</p>', 'Sent', '2026-06-02 06:43:12', '2026-06-02 06:43:12');
+
 -- --------------------------------------------------------
 
 --
@@ -254,6 +233,14 @@ CREATE TABLE `feedback` (
   `feedback_text` text NOT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`feedback_id`, `patient_id`, `feedback_text`, `submitted_at`) VALUES
+(3, 5, 'hi', '2026-06-02 07:28:18'),
+(4, 5, 'rwrtrtrtr', '2026-06-02 07:28:22');
 
 -- --------------------------------------------------------
 
@@ -276,7 +263,10 @@ CREATE TABLE `health_posts` (
 --
 
 INSERT INTO `health_posts` (`post_id`, `uploaded_by`, `title`, `content`, `created_at`, `category`, `image_url`) VALUES
-(2, 3, 'Drink Water', 'Drink 5L per Day', '2026-05-27 19:20:14', 'Wellness', NULL);
+(2, 3, 'Drink Water', 'Drink 5L per Day', '2026-05-27 19:20:14', 'Wellness', NULL),
+(3, 4, 'gjfjfjf', 'fjfjxffffffffffffffffff', '2026-05-31 11:26:13', 'Wellness', NULL),
+(4, 4, 'SKIPPING BREAKFAST', 'Dont skip breakfasts.it is the main meal of the day which keeps you active throughout the day.', '2026-06-01 12:24:26', 'Nutrition', NULL),
+(6, 4, 'etwywywyw4', '4y4yqtwyw', '2026-06-01 12:27:30', 'Nutrition', 'https://www.mlchc.org/sites/default/files/styles/max_650x650/public/2022-03/nutrition_image2.jpg?itok=fUi0J40D');
 
 -- --------------------------------------------------------
 
@@ -299,6 +289,16 @@ CREATE TABLE `medical_certificates` (
   `reviewed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `medical_certificates`
+--
+
+INSERT INTO `medical_certificates` (`certificate_id`, `patient_id`, `doctor_id`, `start_date`, `end_date`, `reason`, `proof_pdf`, `status`, `certificate_pdf`, `rejection_reason`, `requested_at`, `reviewed_at`) VALUES
+(11, 4, 1, '2026-05-25', '2026-06-01', 'heavy fever', '6a1d732727760.png', 'Approved', 'cert_6a1d7403309ac.pdf', NULL, '2026-06-01 11:55:19', '2026-06-01 11:58:59'),
+(12, 2, 1, '2026-06-03', '2026-06-04', 'fever', '6a1fd3c3c171e.png', 'Approved', 'cert_6a1fd479a020c.pdf', NULL, '2026-06-03 07:12:03', '2026-06-03 07:15:05'),
+(13, 2, NULL, '2026-06-16', '2026-06-13', 'fever', 'proof_20304e01a197226150ba37ff48ce2d54.pdf', 'Pending', NULL, NULL, '2026-06-16 14:19:52', NULL),
+(14, 2, NULL, '2026-06-17', '2026-06-15', 'hkghkg', 'proof_4cc973c9f9a7a9879a402a7fdcf49b44.png', 'Pending', NULL, NULL, '2026-06-16 14:23:26', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -319,17 +319,55 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`notification_id`, `user_id`, `message`, `notification_type`, `is_read`, `created_at`) VALUES
-(30, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-27 20:03:56'),
+(30, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 1, '2026-05-27 20:03:56'),
 (31, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-27 20:14:00'),
 (32, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-27 20:24:37'),
 (33, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-27 20:29:03'),
-(34, 8, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-28 05:49:20'),
-(35, 8, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-28 06:10:08'),
-(36, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 07:54 AM', 'Appointment', 0, '2026-05-28 06:23:17'),
-(37, 8, 'A new prescription has been generated for you.', 'Prescription', 0, '2026-05-28 06:25:31'),
+(34, 8, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 1, '2026-05-28 05:49:20'),
+(35, 8, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 1, '2026-05-28 06:10:08'),
+(36, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 07:54 AM', 'Appointment', 1, '2026-05-28 06:23:17'),
+(37, 8, 'A new prescription has been generated for you.', 'Prescription', 1, '2026-05-28 06:25:31'),
 (38, 9, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-05-28 06:36:12'),
-(39, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 12:54 PM', 'Appointment', 0, '2026-05-28 06:56:53'),
-(40, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 02:54 PM', 'Appointment', 0, '2026-05-28 06:57:30');
+(39, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 12:54 PM', 'Appointment', 1, '2026-05-28 06:56:53'),
+(40, 8, 'Your appointment is booked for 2026-05-28. Queue number: 1. Estimated time: 02:54 PM', 'Appointment', 1, '2026-05-28 06:57:30'),
+(41, 8, 'You have appointment in Window 4 (03:00 PM)', 'Reminder', 1, '2026-05-28 08:48:36'),
+(42, 8, 'Your appointment is booked for 2026-05-31. Queue number: 1. Estimated time: 09:42 AM', 'Appointment', 1, '2026-05-31 03:38:57'),
+(43, 8, 'Your appointment is booked for 2026-05-31. Queue number: 1. Estimated time: 12:42 PM', 'Appointment', 1, '2026-05-31 03:40:31'),
+(44, 8, 'A new prescription has been generated for you.', 'Prescription', 1, '2026-05-31 10:40:28'),
+(45, 8, 'Your appointment on 2026-05-28 (Queue #1) has been cancelled successfully.', 'Appointment', 1, '2026-05-31 11:28:07'),
+(46, 9, 'Your appointment is booked for 2026-06-01. Queue number: 1. Estimated time: 07:42 AM', 'Appointment', 0, '2026-06-01 11:38:45'),
+(47, 11, 'Welcome to UWU MedSync! Your account has been verified.', 'System', 0, '2026-06-01 11:46:28'),
+(48, 11, 'Your appointment is booked for 2026-06-02. Queue number: 1. Estimated time: 09:42 AM', 'Appointment', 0, '2026-06-01 11:50:47'),
+(49, 11, 'Your appointment is booked for 2026-06-01. Queue number: 1. Estimated time: 09:42 AM', 'Appointment', 0, '2026-06-01 11:51:38'),
+(50, 11, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-06-01 11:58:59'),
+(51, 9, 'A new prescription has been generated for you.', 'Prescription', 0, '2026-06-01 12:00:12'),
+(52, 11, 'A new prescription has been generated for you.', 'Prescription', 1, '2026-06-01 12:09:19'),
+(53, 11, 'Your appointment on 2026-06-02 was cancelled due to doctor leave. Please rebook.', 'Appointment', 0, '2026-06-01 12:19:59'),
+(54, 8, 'Your appointment is booked for 2026-06-01. Queue number: 1. Estimated time: 02:42 PM', 'Appointment', 0, '2026-06-01 14:59:31'),
+(55, 8, 'Your appointment on 2026-06-01 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-01 15:00:25'),
+(56, 8, 'Your appointment is booked for 2026-06-02. Queue number: 1. Estimated time: 12:42 PM', 'Appointment', 0, '2026-06-02 05:22:05'),
+(57, 8, 'Your appointment on 2026-06-02 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 05:23:14'),
+(58, 8, 'Your appointment is booked for 2026-06-02. Queue number: 1. Estimated time: 02:42 PM', 'Appointment', 0, '2026-06-02 05:30:57'),
+(59, 8, 'Your appointment on 2026-06-02 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 05:31:10'),
+(60, 8, 'Your appointment is booked for 2026-06-02. Queue number: 2. Estimated time: 09:42 AM', 'Appointment', 0, '2026-06-02 05:31:26'),
+(61, 9, 'Your appointment is booked for 2026-06-02. Queue number: 1. Estimated time: 07:42 AM', 'Appointment', 0, '2026-06-02 06:05:40'),
+(62, 12, 'Welcome to UWU MedSync! Your account has been verified.', 'System', 0, '2026-06-02 06:44:40'),
+(63, 12, 'Your appointment is booked for 2026-06-02. Queue number: 2. Estimated time: 08:06 AM', 'Appointment', 0, '2026-06-02 07:16:57'),
+(64, 12, 'Your appointment on 2026-06-02 (Queue #2) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 07:18:30'),
+(65, 12, 'Your appointment is booked for 2026-06-02. Queue number: 1. Estimated time: 12:54 PM', 'Appointment', 0, '2026-06-02 07:18:36'),
+(66, 12, 'Your appointment on 2026-06-02 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 07:19:16'),
+(67, 12, 'Your appointment is booked for 2026-06-02. Queue number: 2. Estimated time: 10:06 AM', 'Appointment', 0, '2026-06-02 07:19:30'),
+(68, 8, 'Your appointment on 2026-06-02 (Queue #2) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 07:46:06'),
+(69, 8, 'Your appointment is booked for 2026-06-02. Window: 01:00 PM - 03:00 PM. Queue number: 1. Estimated time: 12:54 PM', 'Appointment', 0, '2026-06-02 07:46:24'),
+(70, 8, 'Your appointment on 2026-06-02 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 07:54:13'),
+(71, 8, 'Your appointment is booked for 2026-06-02. Window: 10:00 AM - 12:00 PM. Queue number: 2. Estimated time: 10:06 AM', 'Appointment', 0, '2026-06-02 07:54:22'),
+(72, 12, 'Your appointment on 2026-06-02 (Queue #2) has been cancelled successfully.', 'Appointment', 0, '2026-06-02 08:06:38'),
+(73, 12, 'Your appointment is booked for 2026-06-02. Window: 03:00 PM - 05:00 PM. Queue number: 1. Estimated time: 02:54 PM', 'Appointment', 0, '2026-06-02 08:06:42'),
+(74, 12, 'Your appointment on 2026-06-02 (Queue #1) has been cancelled successfully.', 'Appointment', 0, '2026-06-03 04:09:24'),
+(75, 12, 'Your appointment is booked for 2026-06-03. Window: 01:00 PM - 03:00 PM. Queue number: 1. Estimated time: 12:54 PM', 'Appointment', 0, '2026-06-03 04:09:53'),
+(76, 8, 'Your medical certificate request has been approved and is ready to download.', 'Certificate', 0, '2026-06-03 07:15:05'),
+(77, 8, 'Your appointment is booked for 2026-06-16. Window: 08:00 AM - 10:00 AM. Queue number: 1. Estimated time: 07:54 AM', 'Appointment', 1, '2026-06-15 09:51:26'),
+(78, 8, 'Your appointment on 2026-06-02 (Queue #2) has been cancelled successfully.', 'Appointment', 1, '2026-06-15 10:06:40');
 
 -- --------------------------------------------------------
 
@@ -354,7 +392,9 @@ CREATE TABLE `otp_verifications` (
 INSERT INTO `otp_verifications` (`otp_id`, `user_id`, `otp_code`, `otp_type`, `expires_at`, `is_used`, `created_at`) VALUES
 (4, 8, '239716', 'Registration', '2026-05-27 14:49:11', 1, '2026-05-27 09:04:11'),
 (5, 9, '083421', 'Registration', '2026-05-27 19:00:16', 1, '2026-05-27 13:15:16'),
-(6, 8, '877666', 'Forgot Password', '2026-05-27 20:13:46', 1, '2026-05-27 14:28:46');
+(6, 8, '877666', 'Forgot Password', '2026-05-27 20:13:46', 1, '2026-05-27 14:28:46'),
+(8, 11, '935603', 'Registration', '2026-06-01 17:30:31', 1, '2026-06-01 11:45:31'),
+(9, 12, '837208', 'Registration', '2026-06-02 12:28:06', 1, '2026-06-02 06:43:06');
 
 -- --------------------------------------------------------
 
@@ -381,44 +421,9 @@ CREATE TABLE `patients` (
 INSERT INTO `patients` (`patient_id`, `user_id`, `university_id`, `blood_group`, `allergies`, `medical_conditions`, `emergency_contact_name`, `emergency_contact_phone`, `created_at`) VALUES
 (1, 6, 'cst23085', 'A+', '', '', 'naruto uzumaki', '0779866456', '2026-05-26 11:17:34'),
 (2, 8, 'cst23086', 'B-', '', '', 'Father', '0779866444', '2026-05-27 09:04:39'),
-(3, 9, 'cst23091', 'B+', '', '', 'Thanu', '0703107202', '2026-05-27 13:16:05');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pdf_documents`
---
-
-CREATE TABLE `pdf_documents` (
-  `document_id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `document_type` enum('Prescription','Medical Certificate') NOT NULL,
-  `related_id` int(11) NOT NULL,
-  `file_path` varchar(255) NOT NULL,
-  `generated_by` int(11) DEFAULT NULL,
-  `generated_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `pdf_documents`
---
-
-INSERT INTO `pdf_documents` (`document_id`, `patient_id`, `document_type`, `related_id`, `file_path`, `generated_by`, `generated_at`) VALUES
-(1, 2, 'Medical Certificate', 2, 'cert_6a16c40a76565.pdf', 4, '2026-05-27 10:14:34'),
-(2, 1, 'Medical Certificate', 1, 'cert_6a16c5a267e86.pdf', 4, '2026-05-27 10:21:22'),
-(3, 1, 'Prescription', 1, 'presc_6a16c8a5dc70f.pdf', 4, '2026-05-27 10:34:13'),
-(4, 2, 'Medical Certificate', 3, 'cert_6a16e88c47109.pdf', 4, '2026-05-27 12:50:20'),
-(5, 2, 'Prescription', 2, 'presc_6a16e92c99864.pdf', 4, '2026-05-27 12:53:00'),
-(6, 2, 'Prescription', 3, 'presc_6a17300a11042.pdf', 4, '2026-05-27 17:55:22'),
-(7, 2, 'Prescription', 4, 'presc_6a174b9b7bed1.pdf', 4, '2026-05-27 19:52:59'),
-(8, 3, 'Medical Certificate', 4, 'cert_6a174e2c8a338.pdf', 4, '2026-05-27 20:03:56'),
-(9, 3, 'Medical Certificate', 5, 'cert_6a1750881126e.pdf', 4, '2026-05-27 20:14:00'),
-(10, 3, 'Medical Certificate', 6, 'cert_6a1753051a0d4.pdf', 4, '2026-05-27 20:24:37'),
-(11, 3, 'Medical Certificate', 7, 'cert_6a17540f06026.pdf', 4, '2026-05-27 20:29:03'),
-(12, 2, 'Medical Certificate', 8, 'cert_6a17d7604e86b.pdf', 4, '2026-05-28 05:49:20'),
-(13, 2, 'Medical Certificate', 9, 'cert_6a17dc40b1e53.pdf', 4, '2026-05-28 06:10:08'),
-(14, 2, 'Prescription', 5, 'presc_6a17dfdbd5cb3.pdf', 4, '2026-05-28 06:25:31'),
-(15, 3, 'Medical Certificate', 10, 'cert_6a17e25c976d6.pdf', 4, '2026-05-28 06:36:12');
+(3, 9, 'cst23091', 'B+', '', '', 'Thanu', '0703107202', '2026-05-27 13:16:05'),
+(4, 11, 'UWU/CST/23/083', 'B+', 'N/A', 'N/A', 'Raveendran', '0770268274', '2026-06-01 11:46:28'),
+(5, 12, 'grgrgrg', 'B-', 'ttttttttttttt', '55555555555555', '55555555', '555555555555', '2026-06-02 06:44:40');
 
 -- --------------------------------------------------------
 
@@ -443,7 +448,10 @@ CREATE TABLE `prescriptions` (
 --
 
 INSERT INTO `prescriptions` (`prescription_id`, `appointment_id`, `patient_id`, `doctor_id`, `medicines`, `dosage`, `instructions`, `prescription_pdf`, `created_at`) VALUES
-(4, 20, 2, 1, 'jbkjbjk', 'nknk', 'hbjbj', 'presc_6a174b9b7bed1.pdf', '2026-05-27 19:52:59');
+(4, 20, 2, 1, 'jbkjbjk', 'nknk', 'hbjbj', 'presc_6a174b9b7bed1.pdf', '2026-05-27 19:52:59'),
+(6, 26, 2, 1, 'Amaxolin', 'After Meals', 'Take for 3 Days', 'presc_6a1c101c2baef.pdf', '2026-05-31 10:40:28'),
+(7, 27, 3, 1, 'paracetamol\namoxicillin', '', '', 'presc_6a1d744c5a02e.pdf', '2026-06-01 12:00:12'),
+(8, 29, 4, 1, 'parecetamol', 'fgjughjhjkh', '', 'presc_6a1d766f37808.pdf', '2026-06-01 12:09:19');
 
 -- --------------------------------------------------------
 
@@ -471,7 +479,19 @@ INSERT INTO `profile_logs` (`log_id`, `user_id`, `action`, `old_value`, `new_val
 (9, 4, 'Profile Updated', NULL, NULL, '2026-05-27 07:52:20'),
 (10, 8, 'Profile Completed', NULL, NULL, '2026-05-27 09:06:15'),
 (11, 9, 'Profile Completed', NULL, NULL, '2026-05-27 13:17:42'),
-(12, 8, 'Profile Updated', NULL, NULL, '2026-05-27 18:59:40');
+(12, 8, 'Profile Updated', NULL, NULL, '2026-05-27 18:59:40'),
+(13, 11, 'Profile Completed', NULL, NULL, '2026-06-01 11:49:36'),
+(14, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:14'),
+(15, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:18'),
+(16, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:18'),
+(17, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:18'),
+(18, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:19'),
+(19, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:19'),
+(20, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:19'),
+(21, 8, 'Profile Updated', NULL, NULL, '2026-06-02 05:45:32'),
+(22, 12, 'Profile Completed', NULL, NULL, '2026-06-02 07:16:39'),
+(23, 12, 'Profile Completed', NULL, NULL, '2026-06-02 07:17:59'),
+(24, 12, 'Profile Updated', NULL, NULL, '2026-06-02 07:18:06');
 
 -- --------------------------------------------------------
 
@@ -545,8 +565,10 @@ INSERT INTO `users` (`user_id`, `role_id`, `email`, `password`, `full_name`, `ph
 (4, 2, 'doctor@std.uwu.ac.lk', '$2y$10$ENwxpwtGuTw/ffyKKtd0FeujaIzvGFA0TCLkg3eJSSayy2AFEN28a', 'Dr. John Doe', '096965885', 'Male', '2026-05-28', 'jaffna', NULL, 1, 'Active', '2026-05-26 11:17:34', '2026-05-27 07:52:18'),
 (5, 3, 'receptionist@std.uwu.ac.lk', '$2y$10$ENwxpwtGuTw/ffyKKtd0FeujaIzvGFA0TCLkg3eJSSayy2AFEN28a', 'Jane Smith', NULL, NULL, NULL, NULL, NULL, 1, 'Active', '2026-05-26 11:17:34', '2026-05-26 11:17:34'),
 (6, 4, 'patient@std.uwu.ac.lk', '$2y$10$ENwxpwtGuTw/ffyKKtd0FeujaIzvGFA0TCLkg3eJSSayy2AFEN28a', 'Test Patient', '0779866444', 'Male', '2026-05-14', 'jaffna', NULL, 1, 'Active', '2026-05-26 11:17:34', '2026-05-27 07:14:05'),
-(8, 4, 'cst23086@std.uwu.ac.lk', '$2y$10$YCntD/IhFasCJBFgkNQvJugUBQ2tKGMxtKsVDFH5eyu.YEqk/gPeS', 'Thanu', '0779866444', 'Male', '2003-05-24', 'Jaffna', 'uploads/profiles/profile_8_1779908380.jpg', 1, 'Active', '2026-05-27 09:04:11', '2026-05-27 18:59:40'),
-(9, 4, 'cst23091@std.uwu.ac.lk', '$2y$10$C2GlmXmG2DHvuc6xVtXP1Ob9To6M4h3.cdHOi9uu7hPvmtY0k6Pwm', 'Lukirtha', '0703107202', 'Male', '2003-05-01', 'Jaffna', NULL, 1, 'Active', '2026-05-27 13:15:16', '2026-05-27 13:17:42');
+(8, 4, 'cst23086@std.uwu.ac.lk', '$2y$10$YCntD/IhFasCJBFgkNQvJugUBQ2tKGMxtKsVDFH5eyu.YEqk/gPeS', 'Thanu', '0779866444', 'Male', '2003-05-24', 'Jaffna', 'uploads/profiles/profile_8_1779908380.jpg', 1, 'Active', '2026-05-27 09:04:11', '2026-06-02 05:45:32'),
+(9, 4, 'cst23091@std.uwu.ac.lk', '$2y$10$C2GlmXmG2DHvuc6xVtXP1Ob9To6M4h3.cdHOi9uu7hPvmtY0k6Pwm', 'Lukirtha', '0703107202', 'Male', '2003-05-01', 'Jaffna', NULL, 1, 'Active', '2026-05-27 13:15:16', '2026-05-27 13:17:42'),
+(11, 4, 'cst23083@std.uwu.ac.lk', '$2y$10$zmEHMvey9/RUhEXk.q1yw.t.BwhZr3MISi66eVifu5zIWtdXy846u', 'Thushara Raveendran', '0741402512', 'Female', '2002-05-25', 'courts road mallakam', NULL, 1, 'Active', '2026-06-01 11:45:31', '2026-06-15 10:05:03'),
+(12, 4, 'cst23097@std.uwu.ac.lk', '$2y$10$nv5rAd2vac4PSWgXCVReFuJuND1DEfgLoD0wZ1dPGO0oYtrv/OiLW', 'abira', '5555555555555', 'Male', '2006-01-31', '5ttttttttttt', NULL, 1, 'Active', '2026-06-02 06:43:06', '2026-06-02 07:17:59');
 
 --
 -- Indexes for dumped tables
@@ -572,11 +594,10 @@ ALTER TABLE `admin_profiles`
 --
 ALTER TABLE `appointments`
   ADD PRIMARY KEY (`appointment_id`),
-  ADD UNIQUE KEY `appointment_date` (`appointment_date`,`window_id`,`queue_number`),
-  ADD UNIQUE KEY `patient_id` (`patient_id`,`appointment_date`),
   ADD KEY `doctor_id` (`doctor_id`),
   ADD KEY `window_id` (`window_id`),
-  ADD KEY `created_by` (`created_by`);
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_patient` (`patient_id`);
 
 --
 -- Indexes for table `appointment_windows`
@@ -658,14 +679,6 @@ ALTER TABLE `patients`
   ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `pdf_documents`
---
-ALTER TABLE `pdf_documents`
-  ADD PRIMARY KEY (`document_id`),
-  ADD KEY `patient_id` (`patient_id`),
-  ADD KEY `generated_by` (`generated_by`);
-
---
 -- Indexes for table `prescriptions`
 --
 ALTER TABLE `prescriptions`
@@ -711,7 +724,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `active_windows`
 --
 ALTER TABLE `active_windows`
-  MODIFY `active_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
+  MODIFY `active_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=216;
 
 --
 -- AUTO_INCREMENT for table `admin_profiles`
@@ -723,7 +736,7 @@ ALTER TABLE `admin_profiles`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `appointment_windows`
@@ -735,7 +748,7 @@ ALTER TABLE `appointment_windows`
 -- AUTO_INCREMENT for table `checkup_history`
 --
 ALTER TABLE `checkup_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `doctors`
@@ -747,67 +760,61 @@ ALTER TABLE `doctors`
 -- AUTO_INCREMENT for table `doctor_leaves`
 --
 ALTER TABLE `doctor_leaves`
-  MODIFY `leave_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `leave_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `email_logs`
 --
 ALTER TABLE `email_logs`
-  MODIFY `email_log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `email_log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `feedback_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `feedback_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `health_posts`
 --
 ALTER TABLE `health_posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `medical_certificates`
 --
 ALTER TABLE `medical_certificates`
-  MODIFY `certificate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `certificate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `otp_verifications`
 --
 ALTER TABLE `otp_verifications`
-  MODIFY `otp_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `otp_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `patient_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `pdf_documents`
---
-ALTER TABLE `pdf_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `patient_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `prescriptions`
 --
 ALTER TABLE `prescriptions`
-  MODIFY `prescription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `prescription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `profile_logs`
 --
 ALTER TABLE `profile_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `receptionists`
@@ -825,7 +832,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
@@ -915,13 +922,6 @@ ALTER TABLE `otp_verifications`
 --
 ALTER TABLE `patients`
   ADD CONSTRAINT `patients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `pdf_documents`
---
-ALTER TABLE `pdf_documents`
-  ADD CONSTRAINT `pdf_documents_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`),
-  ADD CONSTRAINT `pdf_documents_ibfk_2` FOREIGN KEY (`generated_by`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `prescriptions`
