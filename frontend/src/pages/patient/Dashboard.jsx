@@ -248,7 +248,7 @@ const PatientDashboard = () => {
                         </button>
                     </div>
                 </form>
-            </div>
+            </div> 
         </div>
     );
 };

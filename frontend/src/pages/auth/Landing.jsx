@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import * as healthPostService from '../../services/healthPostService';
 import logo from '../../assets/logo.png';
+import wellnessImage from '../../assets/images/misc/wellness.jpg';
+import mentalHealthImage from '../../assets/images/misc/mental-health.jpg';
+import nutritionImage from '../../assets/images/misc/nutrition.jpg';
+import defaultPostImage from '../../assets/images/misc/default-post.jpg';
+import medicalCenterImage from '../../assets/images/banners/medical-center.jpg';
+import aboutMedsyncImage from '../../assets/images/banners/about-medsync.jpg';
 
 const Landing = () => {
     const [posts, setPosts] = useState([]);
@@ -32,10 +38,10 @@ const Landing = () => {
     const getCategoryImage = (post) => {
         if (post.image_url) return post.image_url;
         const cat = post.category?.toLowerCase();
-        if (cat === 'wellness') return 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80';
-        if (cat === 'mental health') return 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80';
-        if (cat === 'nutrition') return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=600&q=80';
-        return 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=600&q=80';
+        if (cat === 'wellness') return wellnessImage;
+        if (cat === 'mental health') return mentalHealthImage;
+        if (cat === 'nutrition') return nutritionImage;
+        return defaultPostImage;
     };
 
     const getCategoryBadgeClass = (category) => {
@@ -66,7 +72,7 @@ const Landing = () => {
                 </div>
                 <div className="col-lg-6 mt-5 mt-lg-0 text-center position-relative">
                     
-                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Medical Center" className="img-fluid rounded-4 shadow-lg border border-light" style={{ maxHeight: '420px', width: '100%', objectFit: 'cover' }} />
+                    <img src={medicalCenterImage} alt="Medical Center" className="img-fluid rounded-4 shadow-lg border border-light" style={{ maxHeight: '420px', width: '100%', objectFit: 'cover' }} />
                 </div>
             </div>
 
@@ -113,7 +119,7 @@ const Landing = () => {
             {/* About Us Section */}
             <div className="row align-items-center py-5 my-5 border-top border-bottom" id="about">
                 <div className="col-lg-6 mb-4 mb-lg-0">
-                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="About MedSync" className="img-fluid rounded-4 shadow" style={{ maxHeight: '350px', width: '100%', objectFit: 'cover' }} />
+                    <img src={aboutMedsyncImage} alt="About MedSync" className="img-fluid rounded-4 shadow" style={{ maxHeight: '350px', width: '100%', objectFit: 'cover' }} />
                 </div>
                 <div className="col-lg-6 ps-lg-5">
                     <span className="badge bg-secondary-subtle text-secondary mb-3 px-3 py-2 rounded-pill fw-semibold">About UWU Medical</span>
