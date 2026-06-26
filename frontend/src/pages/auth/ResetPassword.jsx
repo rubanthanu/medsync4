@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as authService from '../../services/authService';
 
@@ -14,6 +14,18 @@ const ResetPassword = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [timer, setTimer] = useState(0);
+
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
 
     if (!email) {
         navigate('/login');
@@ -53,6 +65,21 @@ const ResetPassword = () => {
         }
     };
 
+    const handleResend = async () => {
+        setError('');
+        setSuccess('');
+        setResendLoading(true);
+        try {
+            await authService.resendOtp(email, 'Forgot Password');
+            setSuccess('A new OTP has been sent to your email.');
+            setTimer(30); // 30 seconds cooldown
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend OTP');
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     return (
         <div className="row justify-content-center animate-fade-in mt-5">
             <div className="col-md-5">
@@ -73,22 +100,34 @@ const ResetPassword = () => {
                     {success && <div className="alert alert-success">{success}</div>}
 
                     {step === 1 ? (
-                        <form onSubmit={handleVerifyOtp}>
-                            <div className="mb-4">
-                                <input 
-                                    type="text" 
-                                    className="form-control form-control-lg text-center fw-bold" 
-                                    placeholder="Enter OTP"
-                                    value={otp}
-                                    maxLength="6"
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    required
-                                />
+                        <>
+                            <form onSubmit={handleVerifyOtp}>
+                                <div className="mb-4">
+                                    <input 
+                                        type="text" 
+                                        className="form-control form-control-lg text-center fw-bold" 
+                                        placeholder="Enter OTP"
+                                        value={otp}
+                                        maxLength="6"
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100 py-2 rounded-pill" disabled={loading}>
+                                    {loading ? 'Verifying...' : 'Verify OTP'}
+                                </button>
+                            </form>
+                            <div className="mt-3 text-center">
+                                <p className="text-muted mb-0">Didn't receive the code?</p>
+                                <button 
+                                    className="btn btn-link text-primary text-decoration-none fw-bold" 
+                                    onClick={handleResend} 
+                                    disabled={resendLoading || timer > 0}
+                                >
+                                    {resendLoading ? 'Sending...' : timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
+                                </button>
                             </div>
-                            <button type="submit" className="btn btn-primary w-100 py-2 rounded-pill" disabled={loading}>
-                                {loading ? 'Verifying...' : 'Verify OTP'}
-                            </button>
-                        </form>
+                        </>
                     ) : (
                         <form onSubmit={handleResetPassword}>
                             <div className="mb-3">
